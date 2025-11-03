@@ -1,0 +1,86 @@
+/* ======== CONTAINER PRINCIPAL ======== */
+.block-container {
+    padding-top: 1.5rem;
+    max-width: 540px;
+    margin: auto;
+    font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+/* ======== ÁREA DE LOGIN ======== */
+.login-wrapper {
+    max-width: 380px;
+    margin: 2rem auto;
+    padding: 0;
+}
+
+/* ======== LOGO ======== */
+.logo-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.logo-section svg, .logo-section img {
+    max-width: 280px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+}
+
+/* ======== CARD ======== */
+.login-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.8rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* ======== CAMPOS ======== */
+.stTextInput > div > div > input {
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    border: 1.5px solid #d1d5db;
+    background: #fafafa;
+    transition: all 0.2s;
+}
+.stTextInput > div > div > input:focus {
+    border-color: #2563eb;
+    background: white;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* ======== BOTÃO ======== */
+.stButton > button {
+    width: 100%;
+    background: #004080 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 1.2rem;
+    transition: all 0.2s;
+}
+.stButton > button:hover {
+    background: #0059b3 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0,64,128,0.3);
+}
+
+/* ======== EXPANDER ======== */
+.streamlit-expanderHeader {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+/* ======== RODAPÉ ======== */
+.login-footer {
+    text-align: center;
+    margin-top: 1.8rem;
+    color: #9ca3af;
+    font-size: 0.8rem;
+}

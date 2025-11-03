@@ -1,0 +1,89 @@
+/* ======== ESTILO GLOBAL ======== */
+[data-testid="stAppViewContainer"] {
+    background-color: #F8F9FC;
+    padding: 20px;
+    font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+/* ======== SIDEBAR ======== */
+[data-testid="stSidebar"] {
+    background-color: #0C2856;
+}
+
+/* Cor e estilo de todos os textos dentro da sidebar */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] p {
+    color: white !important;
+    font-weight: 500;
+}
+
+/* 🔹 Deixa os títulos “Filtros” e “Gráficos (configuração)” brancos */
+[data-testid="stSidebar"] h2 {
+    color: white !important;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+/* ======== TÍTULOS ======== */
+h1 {
+    color: white;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+h2, h3 {
+    color: #0068FF;
+    font-weight: 700;
+}
+
+/* ======== MÉTRICAS ======== */
+div[data-testid="metric-container"] {
+    background-color: white;
+    border: 1px solid #E5E5E5;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ======== TABELAS ======== */
+.dataframe {
+    border-radius: 10px;
+    border: 1px solid #E0E0E0;
+}
+
+/* ======== SEÇÕES ======== */
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0068FF;
+    margin-top: 25px;
+}
+
+/* ======== GRÁFICOS ======== */
+.plotly-chart {
+    border-radius: 12px;
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+}
+
+/* ======== BOTÃO LIMPAR FILTROS ======== */
+div.stButton > button {
+    background-color: #004080 !important;  /* azul institucional SES-PE */
+    color: white !important;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    padding: 0.5em 1em;
+    width: 100%;  /* ocupa a largura da sidebar */
+    transition: background-color 0.2s ease-in-out;
+}
+
+div.stButton > button:hover {
+    background-color: #0059b3 !important;  /* tom mais claro no hover */
+    color: white !important;
+}
