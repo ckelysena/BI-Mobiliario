@@ -4,7 +4,7 @@ BI - Entregas por Unidade (multi-abas Google Sheets)
 - Lê TODAS as abas via export XLSX (planilha pública ou com acesso aberto)
 - Usa CABEÇALHO NA LINHA 3 (índice 2) em TODAS as abas
 - Une tudo e adiciona coluna ABA (nome da guia)
-- Filtros encadeados: Unidade de destino → Quantidade entregue na unidade → DESCRIÇÃO DO ITEM → n° da OF
+- Filtros encadeados: Unidade de destino → Quantidade entregue na unidade → DESCRIÇÃO DO ITEM RESUMIDA → n° da OF
 - Filtro por ABA(s)
 - Mostra "Dados filtrados" no topo (com TODAS as colunas úteis já com o cabeçalho)
 """
@@ -79,10 +79,21 @@ XLSX_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=xls
 # Linha do cabeçalho (3ª linha visível na planilha → índice 2)
 HEADER_ROW_INDEX = 2
 
+CONFIG_MODEBAR = {
+    "displaylogo": False,
+    "modeBarButtonsToRemove": [
+        "pan2d", "select2d", "lasso2d",
+        "zoomIn2d", "zoomOut2d", "autoScale2d",
+        "hoverClosestCartesian", "hoverCompareCartesian",
+        "toggleSpikelines", "zoom2d", "resetScale2d"
+    ],
+    "modeBarButtonsToAdd": ["toImage"]
+}
+
 # Campos que viram filtros (com variações de nomes vistas nas abas)
 ALVO_NOMES = {
-    "DESCRIÇÃO DO ITEM": [
-        "descrição do item", "descricao do item", "descricao", "descrição", "item"
+    "DESCRIÇÃO DO ITEM RESUMIDA": [
+        "descrição do item resumida", "descricao do item resumida", "descricao", "resumida", "item"
     ],
     "UNIDADE DE DESTINO": [
         "unidade de destino", "unidades de destino", "unidade destino", "unidade", "destino",
@@ -93,11 +104,6 @@ ALVO_NOMES = {
         "n° of", "nº of", "no of", "n of", "of"
     ],
     # ⇩⇩ apenas adição de aliases "quant." e "quant"
-    "QUANTIDADE ENTREGUE NO CD": [
-        "quantidade entregue no cd", "qtd entregue no cd",
-        "quantidade entregue no c d",   # variação eventual
-        "quantidade entregue", "quantidade", "qtd", "quant.", "quant"
-    ],
     "QUANTIDADE ENTREGUE NA UNIDADE": [
         "quantidade entregue na unidade", "QUANT. ENTREGUE NA UNIDADE",
         "quantidade entregue", "quantidade", "qtd", "quant.", "quant"
@@ -116,7 +122,7 @@ CAPA_PRIORIDADE = [
     "SEI DE CONSUMO",
     "E-FISCO", "E FISCO", "EFISCO",
     "GRUPO DE DESPESA",
-    "DESCRIÇÃO DO ITEM",
+    "DESCRIÇÃO DO ITEM RESUMIDA",
     "UNIDADES DE DESTINO", "UNIDADE DE DESTINO",
     "FORNECEDOR",
     "N° OF", "Nº OF", "N° DA OF", "Nº DA OF", "n° da OF", "n° da of",
@@ -244,17 +250,40 @@ with col2:
     except:
         pass
 
+# ===== Sidebar: seleção de abas =====
 with st.sidebar:
     st.header("Abas")
-    abas_escolhidas = st.multiselect(
+
+    opcoes_abas = ["(Todas)"] + list(todas_abas.keys())
+
+    # Callbacks SEGUROS para alterar o estado (executam fora do bloco do widget)
+    def _selecionar_todas():
+        st.session_state["abas_sel"] = ["(Todas)"]
+
+    def _limpar_selecao():
+        st.session_state["abas_sel"] = []
+
+
+
+    # Seleção inicial: começa com "(Todas)" se ainda não houver estado
+    selecao_inicial = st.session_state.get("abas_sel", ["(Todas)"])
+
+    abas_sel = st.multiselect(
         "Quais abas considerar?",
-        options=list(todas_abas.keys()),
-        default=list(todas_abas.keys()),
+        options=opcoes_abas,
+        default=selecao_inicial,
+        key="abas_sel",
+        help="Escolha uma ou várias abas específicas, ou selecione (Todas)."
     )
 
-if not abas_escolhidas:
-    st.info("Selecione ao menos uma aba.")
-    st.stop()
+# ===== Regra: todas, específicas, ou mistura =====
+abas_especificas = [a for a in st.session_state.get("abas_sel", []) if a != "(Todas)"]
+
+# Se "(Todas)" estiver marcada OU se não houver específicas -> usar TODAS
+if "(Todas)" in st.session_state.get("abas_sel", []) or len(abas_especificas) == 0:
+    abas_escolhidas = list(todas_abas.keys())
+else:
+    abas_escolhidas = abas_especificas
 
 # recorte por aba
 df_work = df_full[df_full["ABA"].isin(abas_escolhidas)].copy()
@@ -304,10 +333,9 @@ def select_valor_com_todos(rotulo: str, serie: pd.Series, key: str):
     return None if escolha == "(Todos)" else escolha
 
 CAMPOS = [
-    "DESCRIÇÃO DO ITEM",
+    "DESCRIÇÃO DO ITEM RESUMIDA",
     "UNIDADES DE DESTINO",
     "N° OF",
-    "QUANTIDADE ENTREGUE NO CD",
     "QUANTIDADE ENTREGUE NA UNIDADE",
     "QUANTIDADE NA ATA E CONSUMO",
 ]
@@ -398,21 +426,6 @@ else:
         if valor5 is not None:
             df_filtrado = df_filtrado[df_filtrado[filtro5] == valor5]
 
-    # 6º filtro (opcional)
-    restantes6 = [c for c in opcoes_presentes if c not in [filtro1, filtro2, filtro3, filtro4, filtro5] and c != "(Nenhum)"]
-    filtro6 = st.sidebar.selectbox(
-        "6º filtro (opcional):",
-        ["(Nenhum)"] + restantes6,
-        key=f"filtro6_{reset_key}"
-    )
-    if filtro6 != "(Nenhum)" and filtro6 in df_filtrado.columns:
-        valor6 = select_valor_com_todos(
-            f"Escolha {filtro6}:",
-            df_filtrado[filtro6],
-            key=f"valor6_{reset_key}"
-        )
-        if valor6 is not None:
-            df_filtrado = df_filtrado[df_filtrado[filtro6] == valor6]
 
 # ——— GRID com o CABEÇALHO certo já embutido ———
 abas_texto = ", ".join(abas_escolhidas)
@@ -468,10 +481,6 @@ else:
         "VALOR TOTAL", "VALOR", "VALOR TOTAL (R$)", "TOTAL (R$)", "VALOR PREVISTO",
         "VALOR DA OF", "VALOR GLOBAL"
     ])
-    col_cd = find_col(df_filtrado, [
-        "QUANTIDADE ENTREGUE NO CD", "QTD ENTREGUE NO CD", "QUANT. ENTREGUE NO CD",
-        "QUANT ENTREGUE NO CD", "QUANT", "QTD"
-    ])
     col_unid = find_col(df_filtrado, [
         "QUANTIDADE ENTREGUE NA UNIDADE", "QTD ENTREGUE NA UNIDADE", "QUANT. ENTREGUE NA UNIDADE",
         "QUANT ENTREGUE NA UNIDADE", "QUANT", "QTD"
@@ -479,7 +488,6 @@ else:
 
     faltantes = [n for n, c in {
         "VALOR TOTAL": col_valor,
-        "QUANTIDADE ENTREGUE NO CD": col_cd,
         "QUANTIDADE ENTREGUE NA UNIDADE": col_unid
     }.items() if c is None]
 
@@ -495,11 +503,11 @@ else:
             except Exception:
                 return 0.0
 
-        work = df_filtrado[[dest, col_valor, col_cd, col_unid]].copy()
-        for c in [col_valor, col_cd, col_unid]:
+        work = df_filtrado[[dest, col_valor, col_unid]].copy()
+        for c in [col_valor, col_unid]:
             work[c] = work[c].map(to_number)
 
-        agg = work.groupby(dest, dropna=False)[[col_valor, col_cd, col_unid]].sum().reset_index()
+        agg = work.groupby(dest, dropna=False)[[col_valor, col_unid]].sum().reset_index()
         agg = agg.sort_values(col_valor, ascending=False)
 
         fig = go.Figure()
@@ -513,11 +521,7 @@ else:
             marker_color="#2E86DE"
         ))
 
-        fig.add_trace(go.Bar(
-            x=agg[dest], y=agg[col_cd],
-            name="QUANTIDADE ENTREGUE NO CD", text=agg[col_cd],
-            textposition="outside", marker_color="#10A881"
-        ))
+
         fig.add_trace(go.Bar(
             x=agg[dest], y=agg[col_unid],
             name="QUANTIDADE ENTREGUE NA UNIDADE", text=agg[col_unid],
@@ -536,4 +540,5 @@ else:
             uniformtext_mode='hide'
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+
+        st.plotly_chart(fig, use_container_width=True, config=CONFIG_MODEBAR)
