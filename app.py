@@ -30,11 +30,23 @@ auth_manager = AuthManager(credentials_file="credentials.json")
 if not require_authentication(auth_manager, logo_path="logo.svg"):
     st.stop()
 
+    
+def atualizar_cache_e_rerun():
+    """Limpa o cache de carregar_planilha_xlsx e recarrega a página."""
+    try:
+        carregar_planilha_xlsx.clear()  # limpa só o cache dessa função
+    except Exception:
+        # fallback: limpa todos os caches de dados, se necessário
+        st.cache_data.clear()
+    # opcional: marca um timestamp para exibir no UI se quiser
+    st.session_state["reset_key"] = datetime.now().timestamp()
+    st.rerun()
+
 # ===============================
 # 🔹 CABEÇALHO DO SISTEMA
 # ===============================
 with st.container():
-    col1, col2 = st.columns([4, 1])
+    col1, col2 = st.columns([4, 1.1])  # espaço extra p/ 2 botões
 
     with col1:
         st.markdown(
@@ -50,13 +62,44 @@ with st.container():
         )
 
     with col2:
-        if st.button("Logout", key="logout_btn", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                st.session_state.pop(key)
-            st.session_state["authenticated"] = False
-            st.rerun()
+        # Estilo único para os dois botões do topo
+        st.markdown(
+            """
+            <style>
+            .top-actions button {
+                width: 120px !important;
+                height: 36px !important;
+                background-color:#0C2856 !important;
+                color:white !important;
+                border:none !important;
+                border-radius:8px !important;
+                font-size:15px !important;
+                margin-left:8px !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Dois botões lado a lado
+        bcol1, bcol2 = st.columns([1, 1])
+        with bcol1:
+            st.markdown('<div class="top-actions">', unsafe_allow_html=True)
+            if st.button("Atualizar", key="refresh_btn"):
+                atualizar_cache_e_rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with bcol2:
+            st.markdown('<div class="top-actions">', unsafe_allow_html=True)
+            if st.button("Logout", key="logout_btn"):
+                for key in list(st.session_state.keys()):
+                    st.session_state.pop(key, None)
+                st.session_state["authenticated"] = False
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
 st.divider()
+
 
 try:
     with open("style.css", "r", encoding="utf-8") as f:
@@ -183,16 +226,7 @@ def carregar_planilha_xlsx(url: str, header_row_index: int) -> dict:
             limpos[aba] = df.reset_index(drop=True)
     return limpos
 
-def atualizar_cache_e_rerun():
-    """Limpa o cache de carregar_planilha_xlsx e recarrega a página."""
-    try:
-        carregar_planilha_xlsx.clear()  # limpa só o cache dessa função
-    except Exception:
-        # fallback: limpa todos os caches de dados, se necessário
-        st.cache_data.clear()
-    # opcional: marca um timestamp para exibir no UI se quiser
-    st.session_state["reset_key"] = datetime.now().timestamp()
-    st.rerun()
+
 
 
 def selectbox_com_todos(label, serie: pd.Series):
@@ -329,8 +363,6 @@ def limpar_filtros():
 if st.sidebar.button("🧹 Limpar filtros"):
     limpar_filtros()
 
-if st.sidebar.button("🔄 Atualizar dados agora"):
-    atualizar_cache_e_rerun()
 
 def select_valor_com_todos(rotulo: str, serie: pd.Series, key: str):
     """Selectbox com opção (Todos), retorna None se selecionado."""
