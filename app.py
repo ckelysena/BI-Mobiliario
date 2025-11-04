@@ -34,34 +34,27 @@ if not require_authentication(auth_manager, logo_path="logo.svg"):
 # 🔹 CABEÇALHO DO SISTEMA
 # ===============================
 with st.container():
-    st.markdown(
-        """
-        <div style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 10px 10px 10px;
-        ">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 26px;">👤</span>
-                <h2 style="margin: 0; color: #0C2856;">SES-PE <span style="font-weight:400;">(sespe)</span></h2>
+    col1, col2 = st.columns([4, 1])
+
+    with col1:
+        st.markdown(
+            """
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:26px;">👤</span>
+                <h2 style="margin:0;color:#0C2856;">
+                    SES-PE <span style="font-weight:400;">(sespe)</span>
+                </h2>
             </div>
-            <form action="#" method="post">
-                <button type="submit" style="
-                    background-color: #004080;
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    padding: 6px 16px;
-                    font-size: 15px;
-                    font-weight: 600;
-                    cursor: pointer;
-                ">Logout</button>
-            </form>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+            """,
+            unsafe_allow_html=True
+        )
+
+    with col2:
+        if st.button("Logout", key="logout_btn", use_container_width=True):
+            for key in list(st.session_state.keys()):
+                st.session_state.pop(key)
+            st.session_state["authenticated"] = False
+            st.rerun()
 
 st.divider()
 
@@ -189,6 +182,17 @@ def carregar_planilha_xlsx(url: str, header_row_index: int) -> dict:
         if not df.empty:
             limpos[aba] = df.reset_index(drop=True)
     return limpos
+
+def atualizar_cache_e_rerun():
+    """Limpa o cache de carregar_planilha_xlsx e recarrega a página."""
+    try:
+        carregar_planilha_xlsx.clear()  # limpa só o cache dessa função
+    except Exception:
+        # fallback: limpa todos os caches de dados, se necessário
+        st.cache_data.clear()
+    # opcional: marca um timestamp para exibir no UI se quiser
+    st.session_state["reset_key"] = datetime.now().timestamp()
+    st.rerun()
 
 
 def selectbox_com_todos(label, serie: pd.Series):
@@ -324,6 +328,9 @@ def limpar_filtros():
 
 if st.sidebar.button("🧹 Limpar filtros"):
     limpar_filtros()
+
+if st.sidebar.button("🔄 Atualizar dados agora"):
+    atualizar_cache_e_rerun()
 
 def select_valor_com_todos(rotulo: str, serie: pd.Series, key: str):
     """Selectbox com opção (Todos), retorna None se selecionado."""
