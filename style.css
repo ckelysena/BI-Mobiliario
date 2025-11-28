@@ -29,12 +29,12 @@
 /* ======== TÍTULOS ======== */
 h1 {
     color: white;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -1px;
 }
 h2, h3 {
     color: #0068FF;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 /* ======== MÉTRICAS ======== */
@@ -57,8 +57,8 @@ div[data-testid="metric-container"] {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 21px;
+    font-weight: 600;
     color: #0068FF;
     margin-top: 25px;
 }
@@ -71,19 +71,19 @@ div[data-testid="metric-container"] {
     box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
 }
 
-/* ======== BOTÃO LIMPAR FILTROS ======== */
-div.stButton > button {
-    background-color: #004080 !important;  /* azul institucional SES-PE */
+/* ======== BOTÃO LIMPAR FILTROS (apenas sidebar) ======== */
+[data-testid="stSidebar"] div.stButton > button {
+    background-color: #004080 !important;
     color: white !important;
     border-radius: 8px;
     border: none;
     font-weight: 600;
     padding: 0.5em 1em;
-    width: 100%;  /* ocupa a largura da sidebar */
+    width: 100%;  /* agora só a sidebar ocupa largura toda */
     transition: background-color 0.2s ease-in-out;
 }
 
-div.stButton > button:hover {
-    background-color: #0059b3 !important;  /* tom mais claro no hover */
+[data-testid="stSidebar"] div.stButton > button:hover {
+    background-color: #0059b3 !important;
     color: white !important;
 }
