@@ -3,3 +3,5 @@ plotly
 pandas
 bcrypt
 openpyxl
+streamlit-plotly-events
+requests
